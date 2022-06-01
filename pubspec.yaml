@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sprintf: ^6.0.0
 
 
 dev_dependencies:
