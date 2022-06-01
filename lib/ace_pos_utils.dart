@@ -4,7 +4,7 @@ library ace_pos_print;
 
 import 'dart:convert';
 
-import 'package:ace_pos_print/commands.dart';
+import 'package:ace_pos_utils/commands.dart';
 
 enum PosAlign { left, center, right }
 
