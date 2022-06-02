@@ -130,6 +130,36 @@ class AcePosPrint {
     return bytes;
   }
 
+  List<int> row(List<PosColumn> cols, {String? charset}) {
+    List<int> bytes = [];
+    List<PosColumn> newCols = [];
+    for (var col in cols) {
+      bytes += cAlignCenter.codeUnits;
+
+      int lineCharacters = _charsPerLine();
+
+      int colWidth = (lineCharacters * col.weight).toInt() ~/ col.size.width;
+      bytes += _setSize(col.size);
+      final text = _setTextAlign(col.text.trimToWidth(colWidth), col.align, colWidth);
+      if (col.text.length > colWidth) {
+        newCols.add(PosColumn(
+            text: text.substring(colWidth, col.text.length), size: col.size, align: col.align, weight: col.weight));
+      }
+      if (charset != null) {
+        bytes += _setFont();
+        bytes += Encoding.getByName(charset)?.encode(text) ?? [];
+      } else {
+        bytes += _setFont();
+        bytes += latin1.encode(text);
+      }
+      bytes += feed();
+    }
+    if (newCols.isNotEmpty) {
+      bytes += row(newCols, charset: charset);
+    }
+    return bytes;
+  }
+
   List<int> selectCodeTable(int tableId) {
     List<int> bytes = [];
     bytes += List.from(cCodeTable.codeUnits)..add(tableId);
