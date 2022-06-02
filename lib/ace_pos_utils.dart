@@ -132,6 +132,7 @@ class AcePosPrint {
 
   List<int> row(List<PosColumn> cols, {String? charset}) {
     List<int> bytes = [];
+    bool showPrintNewLine = false;
     List<PosColumn> newCols = [];
     for (var col in cols) {
       bytes += cAlignCenter.codeUnits;
@@ -142,8 +143,11 @@ class AcePosPrint {
       bytes += _setSize(col.size);
       final text = _setTextAlign(col.text.trimToWidth(colWidth), col.align, colWidth);
       if (col.text.length > colWidth) {
+        showPrintNewLine = true;
         newCols.add(PosColumn(
             text: text.substring(colWidth, col.text.length), size: col.size, align: col.align, weight: col.weight));
+      }else{
+        newCols.add(PosColumn(text: " ", size: col.size, align: col.align, weight: col.weight));
       }
       if (charset != null) {
         bytes += _setFont();
@@ -154,7 +158,7 @@ class AcePosPrint {
       }
       bytes += feed();
     }
-    if (newCols.isNotEmpty) {
+    if (showPrintNewLine) {
       bytes += row(newCols, charset: charset);
     }
     return bytes;
