@@ -85,51 +85,6 @@ class AcePosPrint {
     return bytes;
   }
 
-  List<int> print3Column(PosColumn col1, PosColumn col2, PosColumn col3, {String? charset}) {
-    List<int> bytes = [];
-
-    bytes += cAlignCenter.codeUnits;
-
-    int lineCharacters = _charsPerLine();
-
-    int col1Width = (lineCharacters * col1.weight).toInt() ~/ col1.size.width;
-    bytes += _setSize(col1.size);
-    final text1 = _setTextAlign(col1.text.trimToWidth(col1Width), col1.align, col1Width);
-    if (charset != null) {
-      bytes += _setFont();
-      bytes += Encoding.getByName(charset)?.encode(text1) ?? [];
-    } else {
-      bytes += _setFont();
-      bytes += latin1.encode(text1);
-    }
-
-    int col2Width = (lineCharacters * col2.weight).toInt() ~/ col2.size.width;
-    bytes += _setSize(col2.size);
-    final line2 = _setTextAlign(col2.text.trimToWidth(col2Width), col2.align, col2Width);
-
-    if (charset != null) {
-      bytes += _setFont();
-      bytes += Encoding.getByName(charset)?.encode(line2) ?? [];
-    } else {
-      bytes += _setFont();
-      bytes += latin1.encode(line2);
-    }
-
-    int col3Width = (lineCharacters * col3.weight).toInt() ~/ col3.size.width;
-    bytes += _setSize(col3.size);
-    final line3 = _setTextAlign(col3.text.trimToWidth(col3Width), col3.align, col3Width);
-
-    if (charset != null) {
-      bytes += _setFont();
-      bytes += Encoding.getByName(charset)?.encode(line3) ?? [];
-    } else {
-      bytes += _setFont();
-      bytes += latin1.encode(line3);
-    }
-    bytes += feed();
-    return bytes;
-  }
-
   List<int> row(List<PosColumn> cols, {String? charset}) {
     List<int> bytes = [];
     bool showPrintNewLine = false;
@@ -145,8 +100,8 @@ class AcePosPrint {
       if (col.text.length > colWidth) {
         showPrintNewLine = true;
         newCols.add(PosColumn(
-            text: text.substring(colWidth, col.text.length), size: col.size, align: col.align, weight: col.weight));
-      }else{
+            text: col.text.substring(colWidth, col.text.length), size: col.size, align: col.align, weight: col.weight));
+      } else {
         newCols.add(PosColumn(text: " ", size: col.size, align: col.align, weight: col.weight));
       }
       if (charset != null) {
@@ -156,8 +111,8 @@ class AcePosPrint {
         bytes += _setFont();
         bytes += latin1.encode(text);
       }
-      bytes += feed();
     }
+    bytes += feed();
     if (showPrintNewLine) {
       bytes += row(newCols, charset: charset);
     }
@@ -174,8 +129,9 @@ class AcePosPrint {
     return List.from(cFeedN.codeUnits)..add(lines);
   }
 
-  List<int> hr([ch = '-']) {
+  List<int> hr([ch = '-', PosSize size = const PosSize()]) {
     List<int> bytes = [];
+    bytes += _setSize(size);
     for (int i = 0; i < _charsPerLine(); i++) {
       bytes += _setFont();
       bytes.addAll(latin1.encode(ch));
