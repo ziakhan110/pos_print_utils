@@ -20,41 +20,40 @@ class PosPaperSize {
 class PosColumn {
   String text;
   double weight;
-  PosSize size;
-  PosAlign align;
+  PosStyle style;
 
   PosColumn({
     required this.text,
     this.weight = .33,
-    this.size = const PosSize(),
-    this.align = PosAlign.left,
+    this.style = const PosStyle(),
   });
 }
 
 enum PosFont { fontA, fontB }
 
-class PosSize {
+class PosStyle {
   final bool bold;
   final int width;
   final int height;
-  const PosSize({this.bold = false, this.width = 1, this.height = 1});
+  final PosAlign align;
+  const PosStyle({this.bold = false, this.width = 1, this.height = 1, this.align = PosAlign.left});
 }
 
 class AcePosPrint {
   final PosPaperSize _paperSize;
   PosFont? _font;
+  int maxCharsPerLine = 0;
 
   AcePosPrint(this._paperSize, [this._font = PosFont.fontA]);
 
   List<int> printCustom(
     String message, {
-    PosSize size = const PosSize(),
-    PosAlign align = PosAlign.left,
+    PosStyle size = const PosStyle(),
     String? charset,
   }) {
     List<int> bytes = [];
     bytes += _setSize(size);
-    bytes += _setAlign(align);
+    bytes += _setAlign(size.align);
     if (charset != null) {
       bytes += _setFont();
       bytes += Encoding.getByName(charset)?.encode(message) ?? [];
@@ -66,7 +65,7 @@ class AcePosPrint {
     return bytes;
   }
 
-  List<int> printLeftRight(String left, String right, {PosSize size = const PosSize(), String? charset}) {
+  List<int> printLeftRight(String left, String right, {PosStyle size = const PosStyle(), String? charset}) {
     List<int> bytes = [];
     bytes += _setSize(size);
     bytes += cAlignLeft.codeUnits;
@@ -94,15 +93,14 @@ class AcePosPrint {
 
       int lineCharacters = _charsPerLine();
 
-      int colWidth = (lineCharacters * col.weight).toInt() ~/ col.size.width;
-      bytes += _setSize(col.size);
-      final text = _setTextAlign(col.text.trimToWidth(colWidth), col.align, colWidth);
+      int colWidth = (lineCharacters * col.weight).toInt() ~/ col.style.width;
+      bytes += _setSize(col.style);
+      final text = _setTextAlign(col.text.trimToWidth(colWidth), col.style.align, colWidth);
       if (col.text.length > colWidth) {
         showPrintNewLine = true;
-        newCols.add(PosColumn(
-            text: col.text.substring(colWidth, col.text.length), size: col.size, align: col.align, weight: col.weight));
+        newCols.add(PosColumn(text: col.text.substring(colWidth, col.text.length), style: col.style, weight: col.weight));
       } else {
-        newCols.add(PosColumn(text: " ", size: col.size, align: col.align, weight: col.weight));
+        newCols.add(PosColumn(text: " ", style: col.style, weight: col.weight));
       }
       if (charset != null) {
         bytes += _setFont();
@@ -129,7 +127,7 @@ class AcePosPrint {
     return List.from(cFeedN.codeUnits)..add(lines);
   }
 
-  List<int> hr([ch = '-', PosSize size = const PosSize()]) {
+  List<int> hr([ch = '-', PosStyle size = const PosStyle()]) {
     List<int> bytes = [];
     bytes += _setSize(size);
     for (int i = 0; i < _charsPerLine(); i++) {
@@ -152,7 +150,7 @@ class AcePosPrint {
     }
   }
 
-  List<int> _setSize(PosSize size) {
+  List<int> _setSize(PosStyle size) {
     List<int> bytes = [];
     if (size.bold) {
       bytes += cBoldOn.codeUnits;
@@ -184,11 +182,16 @@ class AcePosPrint {
     }
   }
 
+  setMaxCharsPerLine(int chars) {
+    this.maxCharsPerLine = chars;
+  }
+
   void setGlobalFont(PosFont font) {
     this._font = font;
   }
 
-  int _charsPerLine([PosSize size = const PosSize()]) {
+  int _charsPerLine([PosStyle size = const PosStyle()]) {
+    if (maxCharsPerLine > 0) return maxCharsPerLine ~/ size.width;
     int perLine = 0;
     if (_paperSize == PosPaperSize.mm58) {
       perLine = (_font == null || _font == PosFont.fontA) ? 32 : 42;
