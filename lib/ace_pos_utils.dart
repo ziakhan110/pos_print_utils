@@ -48,12 +48,12 @@ class AcePosPrint {
 
   List<int> printCustom(
     String message, {
-    PosStyle size = const PosStyle(),
+    PosStyle style = const PosStyle(),
     String? charset,
   }) {
     List<int> bytes = [];
-    bytes += _setSize(size);
-    bytes += _setAlign(size.align);
+    bytes += _setSize(style);
+    bytes += _setAlign(style.align);
     if (charset != null) {
       bytes += _setFont();
       bytes += Encoding.getByName(charset)?.encode(message) ?? [];
