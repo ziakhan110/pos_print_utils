@@ -65,11 +65,11 @@ class AcePosPrint {
     return bytes;
   }
 
-  List<int> printLeftRight(String left, String right, {PosStyle size = const PosStyle(), String? charset}) {
+  List<int> printLeftRight(String left, String right, {PosStyle style = const PosStyle(), String? charset}) {
     List<int> bytes = [];
-    bytes += _setSize(size);
+    bytes += _setSize(style);
     bytes += cAlignLeft.codeUnits;
-    int width = _charsPerLine(size) ~/ 2;
+    int width = _charsPerLine(style) ~/ 2;
 
     String line = left.trimToWidth(width).padRight(width) + right.trimToWidth(width).padLeft(width);
 
@@ -127,9 +127,9 @@ class AcePosPrint {
     return List.from(cFeedN.codeUnits)..add(lines);
   }
 
-  List<int> hr([ch = '-', PosStyle size = const PosStyle()]) {
+  List<int> hr([ch = '-', PosStyle style = const PosStyle()]) {
     List<int> bytes = [];
-    bytes += _setSize(size);
+    bytes += _setSize(style);
     for (int i = 0; i < _charsPerLine(); i++) {
       bytes += _setFont();
       bytes.addAll(latin1.encode(ch));
@@ -150,14 +150,14 @@ class AcePosPrint {
     }
   }
 
-  List<int> _setSize(PosStyle size) {
+  List<int> _setSize(PosStyle style) {
     List<int> bytes = [];
-    if (size.bold) {
+    if (style.bold) {
       bytes += cBoldOn.codeUnits;
     } else {
       bytes += cBoldOff.codeUnits;
     }
-    return bytes += List.from(cSizeGSn.codeUnits)..add(16 * (size.width - 1) + (size.height - 1));
+    return bytes += List.from(cSizeGSn.codeUnits)..add(16 * (style.width - 1) + (style.height - 1));
   }
 
   String _setTextAlign(String text, PosAlign align, int width) {
