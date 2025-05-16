@@ -1,10 +1,10 @@
 // ignore_for_file: unnecessary_this
 
-library ace_pos_print;
+library pos_print_utils;
 
 import 'dart:convert';
 
-import 'package:ace_pos_utils/commands.dart';
+import 'package:pos_print_utils/commands.dart';
 
 enum PosAlign { left, center, right }
 
@@ -46,7 +46,7 @@ class PosPrintUtils {
 
   PosPrintUtils(this._paperSize, [this._font = PosFont.fontA]);
 
-  List<int> printCustom(
+  List<int> text(
     String message, {
     PosStyle style = const PosStyle(),
     String? charset,
@@ -86,7 +86,7 @@ class PosPrintUtils {
 
   List<int> row(List<PosColumn> cols, {String? charset}) {
     List<int> bytes = [];
-    bool showPrintNewLine = false;
+    bool shouldPrintNewLine = false;
     List<PosColumn> newCols = [];
     for (var col in cols) {
       bytes += cAlignCenter.codeUnits;
@@ -97,7 +97,7 @@ class PosPrintUtils {
       bytes += _setSize(col.style);
       final text = _setTextAlign(col.text.trimToWidth(colWidth), col.style.align, colWidth);
       if (col.text.length > colWidth) {
-        showPrintNewLine = true;
+        shouldPrintNewLine = true;
         newCols.add(PosColumn(text: col.text.substring(colWidth, col.text.length), style: col.style, weight: col.weight));
       } else {
         newCols.add(PosColumn(text: " ", style: col.style, weight: col.weight));
@@ -111,7 +111,7 @@ class PosPrintUtils {
       }
     }
     bytes += feed();
-    if (showPrintNewLine) {
+    if (shouldPrintNewLine) {
       bytes += row(newCols, charset: charset);
     }
     return bytes;
