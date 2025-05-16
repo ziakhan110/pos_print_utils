@@ -39,12 +39,12 @@ class PosStyle {
   const PosStyle({this.bold = false, this.width = 1, this.height = 1, this.align = PosAlign.left});
 }
 
-class AcePosPrint {
+class PosPrintUtils {
   final PosPaperSize _paperSize;
   PosFont? _font;
   int maxCharsPerLine = 0;
 
-  AcePosPrint(this._paperSize, [this._font = PosFont.fontA]);
+  PosPrintUtils(this._paperSize, [this._font = PosFont.fontA]);
 
   List<int> printCustom(
     String message, {
